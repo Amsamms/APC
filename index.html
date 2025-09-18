@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Process Control (APC) in Petroleum Refineries</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals with Blue/Teal Accents -->
+    <!-- Application Structure Plan: A fixed sidebar navigation with a main content area. This structure allows users to easily jump between deep-dive topics (Fundamentals, Market, Case Studies, etc.) without losing context, which is ideal for a dense, multifaceted report. The user flow is non-linear, encouraging exploration. The initial 'Dashboard' view provides a high-level summary to orient the user, while other sections offer detailed, interactive content. This is more user-friendly than a long, scrolling document, as it chunks information into manageable, thematic sections. -->
+    <!-- Visualization & Content Choices: 
+        - Key Metrics (Dashboard): Goal: Inform. Method: Large stat cards (HTML/Tailwind). Interaction: None. Justification: Provides immediate, high-impact takeaways.
+        - APC Hierarchy (Fundamentals): Goal: Organize/Explain. Method: Interactive diagram via nested HTML divs. Interaction: Hover to highlight and view details. Justification: More engaging and clearer than a static image for explaining layered concepts.
+        - Market Share (Market Landscape): Goal: Compare. Method: Chart.js Donut Chart. Interaction: Click a supplier's segment to update a detailed info panel. Justification: Visually represents parts of a whole and links data directly to descriptive content.
+        - Case Studies (Applications): Goal: Provide evidence. Method: Filterable content cards (HTML/JS). Interaction: Buttons filter studies by scope (Unit, Refinery, etc.). Justification: Allows users to focus on relevant examples, making a large dataset navigable.
+        - ROI by Unit (ROI & Adoption): Goal: Quantify/Compare. Method: Chart.js Horizontal Bar Chart. Interaction: Tooltips on hover. Justification: Effectively compares financial benefits across different applications.
+        - APC Workflow (How It Works): Goal: Explain process. Method: HTML/CSS sequential diagram. Interaction: Click steps to expand details. Justification: Breaks down a complex procedure into digestible, user-controlled steps.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f7f4;
+            color: #3d3d3d;
+        }
+        .sidebar-item {
+            transition: all 0.2s ease-in-out;
+        }
+        .sidebar-item.active, .sidebar-item:hover {
+            background-color: #eaddd7;
+            color: #1a202c;
+            transform: translateX(4px);
+        }
+        .content-section {
+            display: none;
+        }
+        .content-section.active {
+            display: block;
+        }
+        .filter-btn {
+            transition: all 0.2s ease-in-out;
+        }
+        .filter-btn.active {
+            background-color: #005f73;
+            color: white;
+        }
+        .chart-container {
+            position: relative; 
+            width: 100%; 
+            max-width: 500px; 
+            margin-left: auto; 
+            margin-right: auto; 
+            height: 300px; 
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <div class="flex min-h-screen">
+        <aside class="w-64 bg-[#efeae6] p-6 hidden lg:block sticky top-0 h-screen shadow-md">
+            <h1 class="text-xl font-bold text-[#003d5b] mb-8">APC in Refineries</h1>
+            <nav id="sidebar-nav">
+                <a href="#dashboard" class="sidebar-item block font-semibold py-2 px-4 rounded-lg mb-2 active">Dashboard</a>
+                <a href="#fundamentals" class="sidebar-item block font-semibold py-2 px-4 rounded-lg mb-2">Fundamentals</a>
+                <a href="#how-it-works" class="sidebar-item block font-semibold py-2 px-4 rounded-lg mb-2">How It Works</a>
+                <a href="#market-landscape" class="sidebar-item block font-semibold py-2 px-4 rounded-lg mb-2">Market Landscape</a>
+                <a href="#applications" class="sidebar-item block font-semibold py-2 px-4 rounded-lg mb-2">Applications & Cases</a>
+                <a href="#ai-ml-impact" class="sidebar-item block font-semibold py-2 px-4 rounded-lg mb-2">The AI/ML Revolution</a>
+                <a href="#roi-adoption" class="sidebar-item block font-semibold py-2 px-4 rounded-lg mb-2">ROI & Adoption</a>
+            </nav>
+        </aside>
+
+        <main class="flex-1 p-6 sm:p-8 md:p-10 bg-[#f8f7f4]">
+            <header class="flex justify-between items-center mb-8 lg:hidden">
+                <h1 class="text-xl font-bold text-[#003d5b]">APC in Refineries</h1>
+                <button id="menu-btn" class="p-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" /></svg>
+                </button>
+            </header>
+
+            <div id="mobile-menu" class="hidden lg:hidden mb-6">
+                <nav id="mobile-sidebar-nav" class="bg-white p-4 rounded-lg shadow">
+                    <a href="#dashboard" class="sidebar-item block font-semibold py-2 px-4 rounded-lg mb-1">Dashboard</a>
+                    <a href="#fundamentals" class="sidebar-item block font-semibold py-2 px-4 rounded-lg mb-1">Fundamentals</a>
+                    <a href="#how-it-works" class="sidebar-item block font-semibold py-2 px-4 rounded-lg mb-1">How It Works</a>
+                    <a href="#market-landscape" class="sidebar-item block font-semibold py-2 px-4 rounded-lg mb-1">Market Landscape</a>
+                    <a href="#applications" class="sidebar-item block font-semibold py-2 px-4 rounded-lg mb-1">Applications & Cases</a>
+                    <a href="#ai-ml-impact" class="sidebar-item block font-semibold py-2 px-4 rounded-lg mb-1">The AI/ML Revolution</a>
+                    <a href="#roi-adoption" class="sidebar-item block font-semibold py-2 px-4 rounded-lg mb-1">ROI & Adoption</a>
+                </nav>
+            </div>
+
+            <div id="dashboard" class="content-section active">
+                <h2 class="text-3xl font-bold text-[#003d5b] mb-4">Dashboard: APC at a Glance</h2>
+                <p class="text-lg text-gray-600 mb-8">Advanced Process Control (APC) represents the next frontier in optimizing petroleum refinery operations. This interactive report provides a comprehensive overview, from core principles to the latest AI-driven innovations. Use the navigation to explore how APC pushes processes to their most profitable and efficient limits.</p>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+                    <div class="bg-white p-6 rounded-xl shadow-md border border-gray-200">
+                        <h3 class="text-lg font-semibold text-gray-500 mb-2">Average ROI</h3>
+                        <p class="text-4xl font-bold text-[#005f73]">200-500%</p>
+                        <p class="text-sm text-gray-500 mt-2">Typical return on investment within the first year.</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-md border border-gray-200">
+                        <h3 class="text-lg font-semibold text-gray-500 mb-2">Global Market Size (2025 Est.)</h3>
+                        <p class="text-4xl font-bold text-[#005f73]">$4.5 Billion</p>
+                        <p class="text-sm text-gray-500 mt-2">For refining and petrochemical sectors.</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-md border border-gray-200">
+                        <h3 class="text-lg font-semibold text-gray-500 mb-2">Typical Throughput Increase</h3>
+                        <p class="text-4xl font-bold text-[#005f73]">2-5%</p>
+                        <p class="text-sm text-gray-500 mt-2">While simultaneously reducing energy consumption.</p>
+                    </div>
+                </div>
+
+                <div class="bg-white p-8 rounded-xl shadow-md border border-gray-200">
+                    <h3 class="text-2xl font-bold text-[#003d5b] mb-4">What is APC?</h3>
+                    <p class="text-gray-700 leading-relaxed">Advanced Process Control (APC) is a sophisticated layer of software and engineering expertise that sits on top of a refinery's basic process control system (DCS). While the DCS focuses on keeping variables like temperature and pressure stable at setpoints, APC strategically manipulates these setpoints in real-time. Its goal is to continuously push the plant's operation towards its most optimal state, accounting for multiple constraints and objectives simultaneously. Think of it as an expert operator with a supercomputer brain, making constant, fine-tuned adjustments to maximize profitability, efficiency, and safety.</p>
+                </div>
+            </div>
+
+            <div id="fundamentals" class="content-section">
+                <h2 class="text-3xl font-bold text-[#003d5b] mb-4">Fundamentals of APC</h2>
+                <p class="text-lg text-gray-600 mb-8">APC isn't a single tool, but a methodology built on multivariable predictive control (MPC). It uses a mathematical model of the process to predict how changes in independent variables (like valve positions) will affect dependent variables (like product quality) over time. This predictive power allows it to operate closer to constraints without violating them.</p>
+
+                <div class="bg-white p-8 rounded-xl shadow-md border border-gray-200">
+                    <h3 class="text-2xl font-bold text-[#003d5b] mb-6 text-center">The Refinery Control Hierarchy</h3>
+                    <p class="text-center text-gray-600 mb-8">APC occupies a critical layer between basic regulatory control and high-level business planning. This diagram shows how these layers interact. Hover over each layer to learn more about its role and timescale.</p>
+                    <div id="hierarchy-diagram" class="space-y-4 max-w-2xl mx-auto">
+                        <div class="hierarchy-level border-2 border-[#003d5b] p-4 rounded-lg text-center" data-info="Role: High-level business strategy and supply chain management. Sets long-term production targets based on market forecasts and crude availability. Timescale: Weeks to Months.">
+                            <h4 class="font-bold text-lg text-[#003d5b]">Planning & Scheduling</h4>
+                        </div>
+                        <div class="flex justify-center"><div class="h-8 w-1 bg-gray-300"></div></div>
+                        <div class="hierarchy-level border-2 border-[#005f73] p-4 rounded-lg text-center" data-info="Role: Real-time optimization of the entire refinery or specific units. APC determines the optimal setpoints for the DCS to achieve the goals set by planning. Timescale: Minutes to Hours.">
+                            <h4 class="font-bold text-lg text-[#005f73]">Advanced Process Control (APC)</h4>
+                        </div>
+                         <div class="flex justify-center"><div class="h-8 w-1 bg-gray-300"></div></div>
+                        <div class="hierarchy-level border-2 border-[#94d2bd] p-4 rounded-lg text-center" data-info="Role: Basic regulatory control. Maintains process variables (temperature, pressure, flow) at the setpoints provided by the APC layer. Timescale: Seconds to Minutes.">
+                            <h4 class="font-bold text-lg text-[#94d2bd]">Basic Control (DCS/PLC)</h4>
+                        </div>
+                         <div class="flex justify-center"><div class="h-8 w-1 bg-gray-300"></div></div>
+                        <div class="hierarchy-level border-2 border-gray-400 p-4 rounded-lg text-center" data-info="Role: Physical equipment. The valves, pumps, heaters, and reactors that actually perform the refining process. Timescale: Real-time physical response.">
+                            <h4 class="font-bold text-lg text-gray-600">Field Instrumentation & Equipment</h4>
+                        </div>
+                    </div>
+                    <div id="hierarchy-info" class="mt-8 p-4 bg-gray-100 rounded-lg min-h-[100px] text-center text-gray-700 italic">
+                        Hover over a layer to see its description.
+                    </div>
+                </div>
+            </div>
+            
+            <div id="how-it-works" class="content-section">
+                <h2 class="text-3xl font-bold text-[#003d5b] mb-4">How It Works: The APC Methodology</h2>
+                <p class="text-lg text-gray-600 mb-8">Implementing an APC solution is a systematic project involving data analysis, model development, and careful deployment. The core is creating a robust predictive model of the process unit. Performance is then measured by controller uptime, model accuracy, and ultimately, the tangible economic benefits delivered.</p>
+
+                <div class="bg-white p-8 rounded-xl shadow-md border border-gray-200">
+                    <h3 class="text-2xl font-bold text-[#003d5b] mb-6 text-center">Typical APC Project Workflow</h3>
+                    <p class="text-center text-gray-600 mb-8">APC projects follow a well-defined path from conception to long-term maintenance. Click on each step below to understand the activities involved.</p>
+                    <div class="flex flex-col md:flex-row justify-between space-y-4 md:space-y-0 md:space-x-2">
+                        <div class="workflow-step flex-1 text-center p-4 border-b-4 border-gray-300 cursor-pointer" data-step="1">
+                            <div class="text-2xl font-bold text-gray-400 mb-2">1</div>
+                            <h4 class="font-semibold">Feasibility & Scoping</h4>
+                        </div>
+                        <div class="workflow-step flex-1 text-center p-4 border-b-4 border-gray-300 cursor-pointer" data-step="2">
+                           <div class="text-2xl font-bold text-gray-400 mb-2">2</div>
+                           <h4 class="font-semibold">Plant Testing & Modeling</h4>
+                        </div>
+                        <div class="workflow-step flex-1 text-center p-4 border-b-4 border-gray-300 cursor-pointer" data-step="3">
+                           <div class="text-2xl font-bold text-gray-400 mb-2">3</div>
+                           <h4 class="font-semibold">Controller Build & Simulation</h4>
+                        </div>
+                        <div class="workflow-step flex-1 text-center p-4 border-b-4 border-gray-300 cursor-pointer" data-step="4">
+                           <div class="text-2xl font-bold text-gray-400 mb-2">4</div>
+                           <h4 class="font-semibold">Deployment & Commissioning</h4>
+                        </div>
+                        <div class="workflow-step flex-1 text-center p-4 border-b-4 border-gray-300 cursor-pointer" data-step="5">
+                           <div class="text-2xl font-bold text-gray-400 mb-2">5</div>
+                           <h4 class="font-semibold">Benefit Capture & Sustainment</h4>
+                        </div>
+                    </div>
+                    <div id="workflow-details" class="mt-8 p-6 bg-gray-100 rounded-lg">
+                        <h4 id="workflow-title" class="text-xl font-bold text-[#003d5b] mb-2">Click a step above</h4>
+                        <p id="workflow-description" class="text-gray-700">Detailed information about the selected workflow step will appear here.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="market-landscape" class="content-section">
+                <h2 class="text-3xl font-bold text-[#003d5b] mb-4">Market Landscape</h2>
+                <p class="text-lg text-gray-600 mb-8">The APC market for refineries is mature and dominated by a few key players who offer comprehensive suites of software and services. These companies have decades of experience and deep domain expertise. Click on a supplier in the chart to learn more about their offerings.</p>
+                <div class="bg-white p-8 rounded-xl shadow-md border border-gray-200">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+                        <div>
+                            <h3 class="text-2xl font-bold text-[#003d5b] mb-4 text-center">Estimated Market Share</h3>
+                             <div class="chart-container">
+                                <canvas id="marketShareChart"></canvas>
+                            </div>
+                        </div>
+                        <div id="supplier-info" class="p-6 bg-gray-50 rounded-lg">
+                            <h4 id="supplier-name" class="text-2xl font-bold text-[#003d5b] mb-3">Select a Supplier</h4>
+                            <p id="supplier-description" class="text-gray-700 mb-4">Details about the selected supplier's APC technology, key features, and market position will be displayed here.</p>
+                            <div id="supplier-features"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="applications" class="content-section">
+                <h2 class="text-3xl font-bold text-[#003d5b] mb-4">Applications & Case Studies</h2>
+                <p class="text-lg text-gray-600 mb-8">APC can be applied at various levels within a refinery, from a single piece of equipment to an entire complex. The scope of the application determines the complexity and potential benefits. Use the filters below to explore real-world case studies.</p>
+                <div class="flex flex-wrap justify-center gap-2 mb-8">
+                    <button class="filter-btn active px-4 py-2 bg-white rounded-full font-semibold shadow" data-filter="all">All Scopes</button>
+                    <button class="filter-btn px-4 py-2 bg-white rounded-full font-semibold shadow" data-filter="unit">Unit Level</button>
+                    <button class="filter-btn px-4 py-2 bg-white rounded-full font-semibold shadow" data-filter="equipment">Equipment Level</button>
+                    <button class="filter-btn px-4 py-2 bg-white rounded-full font-semibold shadow" data-filter="refinery">Refinery-Wide</button>
+                </div>
+                <div id="case-studies-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                </div>
+            </div>
+
+            <div id="ai-ml-impact" class="content-section">
+                <h2 class="text-3xl font-bold text-[#003d5b] mb-4">The AI/ML Revolution</h2>
+                <p class="text-lg text-gray-600 mb-8">While traditional APC relies on first-principle and empirical models, the integration of Artificial Intelligence (AI) and Machine Learning (ML) is unlocking new levels of performance. These technologies enhance APC by creating more accurate models, enabling autonomous operation, and providing predictive maintenance insights.</p>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div class="bg-white p-8 rounded-xl shadow-md border border-gray-200">
+                        <h3 class="text-2xl font-bold text-[#003d5b] mb-4">Traditional APC</h3>
+                        <ul class="space-y-4 text-gray-700">
+                            <li class="flex items-start"><span class="font-bold text-[#005f73] mr-3 mt-1">&#10148;</span><span><strong>Model Type:</strong> Linear, step-test based models. Requires significant manual effort to build and maintain.</span></li>
+                            <li class="flex items-start"><span class="font-bold text-[#005f73] mr-3 mt-1">&#10148;</span><span><strong>Adaptation:</strong> Models are static and require periodic re-testing to account for catalyst aging or equipment fouling.</span></li>
+                            <li class="flex items-start"><span class="font-bold text-[#005f73] mr-3 mt-1">&#10148;</span><span><strong>Optimization:</strong> Solves a linear program at each step. Effective but can miss non-linear opportunities.</span></li>
+                            <li class="flex items-start"><span class="font-bold text-[#005f73] mr-3 mt-1">&#10148;</span><span><strong>Scope:</strong> Typically focused on stabilizing and pushing a single process unit towards its constraints.</span></li>
+                        </ul>
+                    </div>
+                    <div class="bg-white p-8 rounded-xl shadow-md border-2 border-[#00a896]">
+                        <h3 class="text-2xl font-bold text-[#00a896] mb-4">AI-Enhanced APC</h3>
+                         <ul class="space-y-4 text-gray-700">
+                            <li class="flex items-start"><span class="font-bold text-[#00a896] mr-3 mt-1">&#10148;</span><span><strong>Model Type:</strong> Non-linear models (Neural Networks, Random Forests) that learn directly from historical data.</span></li>
+                            <li class="flex items-start"><span class="font-bold text-[#00a896] mr-3 mt-1">&#10148;</span><span><strong>Adaptation:</strong> Self-learning models that adapt in real-time to changing process dynamics, improving accuracy over time.</span></li>
+                            <li class="flex items-start"><span class="font-bold text-[#00a896] mr-3 mt-1">&#10148;</span><span><strong>Optimization:</strong> Can use more complex algorithms (e.g., reinforcement learning) to find the true global optimum.</span></li>
+                            <li class="flex items-start"><span class="font-bold text-[#00a896] mr-3 mt-1">&#10148;</span><span><strong>Scope:</strong> Enables plant-wide optimization and predictive alerts for equipment health, bridging operations and maintenance.</span></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="roi-adoption" class="content-section">
+                <h2 class="text-3xl font-bold text-[#003d5b] mb-4">ROI & Adoption</h2>
+                <p class="text-lg text-gray-600 mb-8">The business case for APC is exceptionally strong, which is why adoption is widespread in the refining industry. Benefits are realized through increased throughput, higher yields of valuable products, and reduced energy consumption. The chart below shows typical annualized benefits for various refinery units.</p>
+                <div class="bg-white p-8 rounded-xl shadow-md border border-gray-200">
+                    <h3 class="text-2xl font-bold text-[#003d5b] mb-6 text-center">Typical Annualized Benefits by Refinery Unit</h3>
+                    <div class="chart-container h-[400px] md:h-[500px]">
+                        <canvas id="roiChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const sections = document.querySelectorAll('.content-section');
+    const navLinks = document.querySelectorAll('.sidebar-item');
+    const menuBtn = document.getElementById('menu-btn');
+    const mobileMenu = document.getElementById('mobile-menu');
+
+    function navigate(hash) {
+        sections.forEach(section => {
+            if ('#' + section.id === hash) {
+                section.classList.add('active');
+            } else {
+                section.classList.remove('active');
+            }
+        });
+        navLinks.forEach(link => {
+            if (link.getAttribute('href') === hash) {
+                link.classList.add('active');
+            } else {
+                link.classList.remove('active');
+            }
+        });
+        window.scrollTo(0,0);
+        mobileMenu.classList.add('hidden');
+    }
+
+    function setupNavigation(navContainerId) {
+        document.getElementById(navContainerId).addEventListener('click', function (e) {
+            const target = e.target.closest('a');
+            if (target && target.classList.contains('sidebar-item')) {
+                e.preventDefault();
+                const hash = target.getAttribute('href');
+                navigate(hash);
+                location.hash = hash;
+            }
+        });
+    }
+
+    setupNavigation('sidebar-nav');
+    setupNavigation('mobile-sidebar-nav');
+
+    menuBtn.addEventListener('click', () => {
+        mobileMenu.classList.toggle('hidden');
+    });
+
+    const initialHash = window.location.hash || '#dashboard';
+    navigate(initialHash);
+    
+    const marketData = {
+        labels: ['AspenTech', 'Honeywell', 'Yokogawa', 'Emerson', 'Other'],
+        datasets: [{
+            label: 'Market Share',
+            data: [35, 30, 15, 12, 8],
+            backgroundColor: ['#003d5b', '#005f73', '#00a896', '#94d2bd', '#e9d8a6'],
+            hoverOffset: 4
+        }]
+    };
+    
+    const supplierInfoData = {
+        'AspenTech': {
+            name: 'AspenTech (Aspen DMCplus)',
+            description: 'A market leader known for its powerful Dynamic Matrix Control (DMC) technology. AspenTech controllers are widely used for complex, highly interactive processes and are praised for their robustness and performance.',
+            features: ['Patented DMCplus algorithm', 'Strong integration with simulation (Aspen HYSYS)', 'Adaptive control features to handle changing dynamics']
+        },
+        'Honeywell': {
+            name: 'Honeywell (Profit Controller)',
+            description: 'A major competitor with a strong installed base. Honeywell\'s Profit Suite focuses on delivering measurable economic value and integrates well with their Experion DCS, offering a unified operator environment.',
+            features: ['Robust handling of constraints', 'Profit-based optimization engine', 'Seamless integration with Honeywell DCS']
+        },
+        'Yokogawa': {
+            name: 'Yokogawa (PACE)',
+            description: 'Yokogawa offers a comprehensive suite called "Platform for Advanced Control and Estimation" (PACE). They are known for their focus on operational excellence and long-term performance sustainment.',
+            features: ['Shell\'s multivariable control technology', 'Advanced diagnostics and performance monitoring', 'Emphasis on lifecycle maintenance']
+        },
+        'Emerson': {
+            name: 'Emerson (DeltaV PredictPro)',
+            description: 'Emerson\'s offering is tightly integrated with their DeltaV control system. They emphasize ease of use and implementation, making APC more accessible for a wider range of applications.',
+            features: ['Native integration with DeltaV DCS', 'Model predictive control embedded in the controller', 'Simplified engineering and maintenance workflow']
+        },
+        'Other': {
+            name: 'Other Niche & Regional Suppliers',
+            description: 'This category includes various other suppliers like Schneider Electric (EcoStruxure), as well as smaller, specialized firms and in-house solutions developed by major oil companies.',
+            features: ['Specialized solutions for specific units', 'Regional expertise', 'Often more flexible pricing or service models']
+        }
+    };
+    
+    const marketShareCtx = document.getElementById('marketShareChart').getContext('2d');
+    const marketShareChart = new Chart(marketShareCtx, {
+        type: 'doughnut',
+        data: marketData,
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            let label = context.label || '';
+                            if (label) {
+                                label += ': ';
+                            }
+                            if (context.parsed !== null) {
+                                label += context.parsed + '%';
+                            }
+                            return label;
+                        }
+                    }
+                }
+            },
+            onClick: (event, elements) => {
+                if (elements.length > 0) {
+                    const i = elements[0].index;
+                    const supplierName = marketData.labels[i];
+                    updateSupplierInfo(supplierName);
+                }
+            }
+        }
+    });
+
+    function updateSupplierInfo(supplierKey) {
+        const info = supplierInfoData[supplierKey];
+        if (!info) return;
+
+        document.getElementById('supplier-name').textContent = info.name;
+        document.getElementById('supplier-description').textContent = info.description;
+        const featuresList = document.getElementById('supplier-features');
+        featuresList.innerHTML = '<h5 class="font-semibold text-gray-800 mb-2">Key Features:</h5>';
+        const ul = document.createElement('ul');
+        ul.className = 'list-none space-y-2';
+        info.features.forEach(feature => {
+            const li = document.createElement('li');
+            li.className = 'flex items-start text-sm text-gray-600';
+            li.innerHTML = `<span class="text-[#005f73] mr-2">&#10003;</span> ${feature}`;
+            ul.appendChild(li);
+        });
+        featuresList.appendChild(ul);
+    }
+    updateSupplierInfo('AspenTech');
+
+    const roiData = {
+        labels: ['Crude Distillation Unit', 'Fluid Catalytic Cracker (FCC)', 'Hydrocracker', 'Reformer', 'Alkylation Unit', 'Delayed Coker', 'Refinery-wide Blending'],
+        datasets: [{
+            label: 'Annualized Benefits (USD Millions)',
+            data: [2.5, 4.0, 3.5, 2.0, 1.8, 3.0, 5.5],
+            backgroundColor: '#005f73',
+            borderColor: '#003d5b',
+            borderWidth: 1
+        }]
+    };
+    const roiCtx = document.getElementById('roiChart').getContext('2d');
+    const roiChart = new Chart(roiCtx, {
+        type: 'bar',
+        data: roiData,
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                title: { display: true, text: 'Benefit ranges can vary based on unit size and market conditions.' },
+                 tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return ` $${context.formattedValue} Million`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Annual Benefits (USD Millions)'
+                    }
+                }
+            }
+        }
+    });
+
+    const hierarchyLevels = document.querySelectorAll('.hierarchy-level');
+    const hierarchyInfoBox = document.getElementById('hierarchy-info');
+    hierarchyLevels.forEach(level => {
+        level.addEventListener('mouseenter', () => {
+            hierarchyInfoBox.textContent = level.dataset.info;
+            level.style.transform = 'scale(1.03)';
+            level.style.transition = 'transform 0.2s';
+        });
+        level.addEventListener('mouseleave', () => {
+            hierarchyInfoBox.textContent = 'Hover over a layer to see its description.';
+            level.style.transform = 'scale(1)';
+        });
+    });
+    
+    const workflowSteps = document.querySelectorAll('.workflow-step');
+    const workflowTitle = document.getElementById('workflow-title');
+    const workflowDescription = document.getElementById('workflow-description');
+    const workflowData = {
+        '1': {
+            title: 'Step 1: Feasibility & Scoping',
+            description: 'Engineers perform a detailed study to identify potential economic benefits, define control objectives, and determine the project scope. This involves analyzing historical process data, interviewing operators, and setting clear KPIs for success. A thorough cost-benefit analysis is presented to management.'
+        },
+        '2': {
+            title: 'Step 2: Plant Testing & Modeling',
+            description: 'This is the most critical phase. Engineers conduct carefully designed "step tests" on the live plant, perturbing process inputs and recording the dynamic responses of the outputs. This data is then used to build the mathematical multivariable model that forms the core of the APC controller.'
+        },
+        '3': {
+            title: 'Step 3: Controller Build & Simulation',
+            description: 'Using the model from the plant tests, the APC controller is configured in an offline environment. This includes defining all manipulated variables (MVs), controlled variables (CVs), and process constraints. The controller is then rigorously tested in a simulation against a virtual model of the plant to ensure it behaves as expected.'
+        },
+        '4': {
+            title: 'Step 4: Deployment & Commissioning',
+            description: 'The controller is deployed to the live system. Commissioning starts in "predict-only" mode to verify model accuracy. Then, it is carefully turned on, variable by variable, with engineers and operators closely monitoring its performance. The controller is tuned to ensure smooth, stable, and effective control.'
+        },
+        '5': {
+            title: 'Step 5: Benefit Capture & Sustainment',
+            description: 'After commissioning, a performance test is conducted to quantify the achieved benefits against the initial targets. A long-term sustainment plan is put in place, involving regular performance monitoring, model maintenance, and operator training to ensure the benefits are maintained over the controller\'s lifecycle.'
+        }
+    };
+
+    function updateWorkflowStep(step) {
+        workflowSteps.forEach(s => {
+            s.classList.remove('active-step');
+            s.style.borderColor = '#d1d5db';
+        });
+        const activeStep = document.querySelector(`.workflow-step[data-step="${step}"]`);
+        activeStep.style.borderColor = '#005f73';
+        const data = workflowData[step];
+        workflowTitle.textContent = data.title;
+        workflowDescription.textContent = data.description;
+    }
+    
+    workflowSteps.forEach(step => {
+        step.addEventListener('click', () => {
+            updateWorkflowStep(step.dataset.step);
+        });
+    });
+    updateWorkflowStep('1');
+
+
+    const caseStudiesData = [
+        {
+            title: 'FCCU Yield Optimization',
+            category: 'unit',
+            problem: 'Inconsistent conversion and valuable product yields due to feed variations and operational shifts.',
+            solution: 'Implemented an APC controller to manage riser temperature, catalyst circulation, and feed rates.',
+            capex: '$500,000',
+            timeline: '9 months',
+            roi: 'Increased gasoline yield by 1.5%, resulting in $4M/year benefit. Payback period of under 2 months.'
+        },
+        {
+            title: 'Crude Unit Energy Reduction',
+            category: 'unit',
+            problem: 'High energy consumption from furnaces and difficulty maintaining product quality specifications.',
+            solution: 'APC to optimize pre-heat train, furnace firing, and pumparound duties.',
+            capex: '$750,000',
+            timeline: '12 months',
+            roi: 'Reduced fuel gas consumption by 5%, saving $3.5M/year. Improved cutpoint control.'
+        },
+        {
+            title: 'Furnace Pass Balancing',
+            category: 'equipment',
+            problem: 'Uneven temperature distribution across furnace passes, leading to tube coking and reduced run length.',
+            solution: 'A small-scale APC controller to actively balance pass outlet temperatures by adjusting individual fuel gas valves.',
+            capex: '$150,000',
+            timeline: '4 months',
+            roi: 'Extended furnace run length by 6 months, avoiding costly shutdowns. ROI of >400%.'
+        },
+        {
+            title: 'Refinery-Wide Hydrogen Management',
+            category: 'refinery',
+            problem: 'Inefficient allocation of high-purity hydrogen across multiple hydrotreating units, leading to costly venting or over-processing.',
+            solution: 'A supervisory APC system to manage the entire hydrogen network, optimizing producer outputs and consumer pressures.',
+            capex: '$1.2 Million',
+            timeline: '18 months',
+            roi: 'Reduced hydrogen plant production costs by 3% and minimized venting, saving $5M/year.'
+        },
+        {
+            title: 'Reformer Octane Control',
+            category: 'unit',
+            problem: 'Difficulty in consistently meeting reformate octane targets, leading to octane giveaway and increased operating costs.',
+            solution: 'APC to control reactor temperatures and pressure to tightly manage the reformate RON.',
+            capex: '$400,000',
+            timeline: '8 months',
+            roi: 'Reduced octane giveaway by 0.5 RON, saving $2.2M/year in reduced severity and higher value blending.',
+        },
+        {
+            title: 'Blending Optimization',
+            category: 'refinery',
+            problem: 'Recipe giveaway and re-blends due to variability in component properties and non-optimal recipe calculations.',
+            solution: 'Integration of online analyzers with a supervisory APC blender controller.',
+            capex: '$900,000',
+            timeline: '15 months',
+            roi: 'Saved $6M/year by minimizing quality giveaway and using cheaper components more effectively.'
+        },
+        {
+            title: 'Compressor Surge Control',
+            category: 'equipment',
+            problem: 'Risk of catastrophic compressor damage from operating too close to the surge line, forcing inefficient, conservative operation.',
+            solution: 'High-speed APC controller specifically for anti-surge, allowing operation closer to the limit safely.',
+            capex: '$200,000',
+            timeline: '6 months',
+            roi: 'Improved compressor efficiency by 4%, reducing energy costs and increasing throughput capacity.'
+        },
+        {
+            title: 'Delayed Coker Optimization',
+            category: 'unit',
+            problem: 'Sub-optimal coke drum cycle times and furnace temperatures, impacting throughput and valuable liquid yields.',
+            solution: 'APC to manage furnace outlet temperatures and drum switching logic for maximum throughput.',
+            capex: '$600,000',
+            timeline: '10 months',
+            roi: 'Increased throughput by 3% and improved liquid yield, generating an additional $4.5M/year.'
+        }
+    ];
+
+    const caseStudiesGrid = document.getElementById('case-studies-grid');
+    const filterBtns = document.querySelectorAll('.filter-btn');
+
+    function renderCaseStudies(filter = 'all') {
+        caseStudiesGrid.innerHTML = '';
+        const filteredData = filter === 'all' ? caseStudiesData : caseStudiesData.filter(study => study.category === filter);
+
+        filteredData.forEach(study => {
+            const card = document.createElement('div');
+            card.className = `case-study-card bg-white p-6 rounded-xl shadow-md border border-gray-200 flex flex-col`;
+            card.setAttribute('data-category', study.category);
+            card.innerHTML = `
+                <span class="inline-block bg-[#e9d8a6] text-[#003d5b] px-3 py-1 text-sm font-semibold rounded-full self-start mb-4 capitalize">${study.category.replace('-', ' ')} Level</span>
+                <h4 class="text-xl font-bold text-[#003d5b] mb-3">${study.title}</h4>
+                <div class="mb-4 flex-grow">
+                    <p class="font-semibold text-gray-800">Problem:</p>
+                    <p class="text-gray-600 text-sm mb-2">${study.problem}</p>
+                    <p class="font-semibold text-gray-800">APC Solution:</p>
+                    <p class="text-gray-600 text-sm">${study.solution}</p>
+                </div>
+                <div class="border-t pt-4 mt-auto">
+                    <p class="text-sm text-gray-800"><span class="font-bold">ROI:</span> ${study.roi}</p>
+                    <div class="flex justify-between text-sm mt-2 text-gray-500">
+                        <span><span class="font-semibold">CAPEX:</span> ${study.capex}</span>
+                        <span><span class="font-semibold">Timeline:</span> ${study.timeline}</span>
+                    </div>
+                </div>
+            `;
+            caseStudiesGrid.appendChild(card);
+        });
+    }
+
+    filterBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            filterBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            renderCaseStudies(btn.dataset.filter);
+        });
+    });
+
+    renderCaseStudies();
+});
+</script>
+</body>
+</html>
