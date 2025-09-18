@@ -21,17 +21,68 @@
     -->
     <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
     <style>
+        :root {
+            --bg-1: #020617;
+            --bg-2: #0f172a;
+            --bg-3: #1e293b;
+            --text-primary: #f8fafc;
+            --text-muted: #cbd5f5;
+            --border-color: rgba(148, 163, 184, 0.25);
+            --surface-primary: rgba(15, 23, 42, 0.75);
+            --surface-glow: rgba(56, 189, 248, 0.18);
+            --surface-highlight: rgba(192, 132, 252, 0.2);
+            --accent-1: #38bdf8;
+            --accent-2: #c084fc;
+            --accent-3: #f97316;
+        }
+        html {
+            scroll-behavior: smooth;
+        }
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f8f7f4;
-            color: #3d3d3d;
+            background:
+                radial-gradient(circle at 15% 15%, rgba(56, 189, 248, 0.18), transparent 45%),
+                radial-gradient(circle at 85% 25%, rgba(236, 72, 153, 0.16), transparent 42%),
+                radial-gradient(circle at 40% 90%, rgba(248, 113, 113, 0.12), transparent 55%),
+                linear-gradient(135deg, var(--bg-1) 0%, var(--bg-2) 45%, var(--bg-3) 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(120deg, rgba(56, 189, 248, 0.1), rgba(192, 132, 252, 0.08));
+            opacity: 0.6;
+            filter: blur(120px);
+            pointer-events: none;
+        }
+        a {
+            color: inherit;
+        }
+        p {
+            color: var(--text-muted);
+        }
+        h1, h2, h3, h4 {
+            color: var(--text-primary);
+        }
+        .sidebar {
+            background: rgba(2, 6, 23, 0.78);
+            backdrop-filter: blur(24px);
+            border-right: 1px solid var(--border-color);
+            box-shadow: 0 20px 60px -35px rgba(8, 47, 73, 0.65);
         }
         .sidebar-item {
-            transition: all 0.2s ease-in-out;
+            transition: all 0.25s ease;
+            color: var(--text-muted);
+            border-radius: 12px;
         }
         .sidebar-item.active, .sidebar-item:hover {
-            background-color: #eaddd7;
-            color: #1a202c;
+            background: linear-gradient(135deg, var(--surface-glow), var(--surface-highlight));
+            color: var(--text-primary);
+            box-shadow: 0 16px 32px -28px rgba(56, 189, 248, 0.9);
             transform: translateX(4px);
         }
         .content-section {
@@ -40,25 +91,160 @@
         .content-section.active {
             display: block;
         }
+        .surface-card {
+            background: linear-gradient(145deg, rgba(15, 23, 42, 0.85), rgba(30, 41, 59, 0.78));
+            border: 1px solid var(--border-color);
+            border-radius: 22px;
+            box-shadow: 0 24px 60px -35px rgba(8, 47, 73, 0.8);
+            backdrop-filter: blur(22px);
+        }
+        .surface-card.accent-card {
+            border-color: rgba(56, 189, 248, 0.55);
+            box-shadow: 0 26px 65px -30px rgba(56, 189, 248, 0.75);
+        }
+        .surface-card p {
+            color: var(--text-muted);
+        }
+        .stat-card {
+            background: linear-gradient(135deg, rgba(56, 189, 248, 0.18), rgba(192, 132, 252, 0.18));
+            border: 1px solid rgba(56, 189, 248, 0.35);
+            border-radius: 22px;
+            box-shadow: 0 20px 55px -35px rgba(59, 130, 246, 0.9);
+            backdrop-filter: blur(20px);
+        }
+        .stat-title {
+            color: rgba(226, 232, 240, 0.75);
+            letter-spacing: 0.08em;
+        }
+        .stat-value {
+            color: var(--text-primary);
+        }
+        #mobile-menu {
+            position: absolute;
+            top: 4.25rem;
+            left: 50%;
+            transform: translateX(-50%);
+            width: calc(100% - 2.5rem);
+            z-index: 30;
+        }
+        #mobile-menu nav {
+            background: rgba(2, 6, 23, 0.92);
+            border: 1px solid var(--border-color);
+            border-radius: 18px;
+            box-shadow: 0 18px 40px -28px rgba(15, 118, 110, 0.6);
+            backdrop-filter: blur(22px);
+        }
         .filter-btn {
-            transition: all 0.2s ease-in-out;
+            color: var(--text-muted);
+            border: 1px solid transparent;
+            transition: all 0.25s ease;
+            background: rgba(15, 23, 42, 0.55);
+            border-radius: 9999px;
+        }
+        .filter-btn:hover {
+            color: var(--text-primary);
+            border-color: rgba(56, 189, 248, 0.5);
+            box-shadow: 0 14px 35px -28px rgba(56, 189, 248, 0.9);
         }
         .filter-btn.active {
-            background-color: #005f73;
-            color: white;
+            color: var(--text-primary);
+            background: linear-gradient(135deg, rgba(56, 189, 248, 0.24), rgba(192, 132, 252, 0.24));
+            border-color: rgba(56, 189, 248, 0.55);
+            box-shadow: 0 20px 45px -30px rgba(56, 189, 248, 0.85);
+        }
+        .hierarchy-level {
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.7), rgba(56, 189, 248, 0.18));
+            border: 1px solid rgba(56, 189, 248, 0.35);
+            border-radius: 18px;
+            transition: transform 0.25s ease, box-shadow 0.3s ease;
+            color: var(--text-primary);
+        }
+        .hierarchy-level:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 18px 40px -28px rgba(56, 189, 248, 0.85);
+        }
+        #hierarchy-info {
+            background: rgba(2, 6, 23, 0.7);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            color: var(--text-muted);
+        }
+        .workflow-step {
+            border: 1px solid rgba(148, 163, 184, 0.35);
+            border-radius: 18px;
+            padding: 1.5rem 1rem;
+            background: linear-gradient(145deg, rgba(15, 23, 42, 0.7), rgba(30, 41, 59, 0.6));
+            color: var(--text-muted);
+            transition: transform 0.25s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+        }
+        .workflow-step:hover {
+            transform: translateY(-4px);
+            border-color: rgba(56, 189, 248, 0.5);
+            box-shadow: 0 18px 40px -30px rgba(56, 189, 248, 0.75);
+        }
+        .workflow-step.active-step {
+            border-color: rgba(56, 189, 248, 0.75);
+            color: var(--text-primary);
+            background: linear-gradient(135deg, rgba(56, 189, 248, 0.22), rgba(192, 132, 252, 0.28));
+            box-shadow: 0 22px 45px -30px rgba(56, 189, 248, 0.9);
+        }
+        #workflow-details {
+            border: 1px solid var(--border-color);
+            background: rgba(2, 6, 23, 0.75);
+            border-radius: 20px;
+            box-shadow: 0 24px 55px -35px rgba(8, 47, 73, 0.8);
+        }
+        #workflow-details h4 {
+            color: var(--text-primary);
+        }
+        #workflow-details p {
+            color: var(--text-muted);
         }
         .chart-container {
-            position: relative; 
-            width: 100%; 
-            max-width: 500px; 
-            margin-left: auto; 
-            margin-right: auto; 
-            height: 300px; 
-            max-height: 400px;
+            position: relative;
+            width: 100%;
+            max-width: 520px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 320px;
         }
         @media (min-width: 768px) {
             .chart-container {
-                height: 350px;
+                height: 380px;
+            }
+        }
+        .case-study-card {
+            display: flex;
+            flex-direction: column;
+        }
+        .case-study-card .card-tag {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.25), rgba(56, 189, 248, 0.2));
+            color: var(--text-primary);
+        }
+        .case-study-card .card-footer {
+            border-top: 1px solid rgba(148, 163, 184, 0.25);
+        }
+        .inner-card {
+            background: rgba(2, 6, 23, 0.6);
+            border: 1px solid var(--border-color);
+            border-radius: 18px;
+            box-shadow: 0 16px 40px -32px rgba(8, 47, 73, 0.7);
+            backdrop-filter: blur(18px);
+        }
+        header button#menu-btn {
+            background: rgba(15, 23, 42, 0.65);
+            border: 1px solid rgba(56, 189, 248, 0.35);
+            border-radius: 12px;
+            padding: 0.5rem;
+            color: var(--text-primary);
+            box-shadow: 0 14px 35px -28px rgba(56, 189, 248, 0.8);
+        }
+        header button#menu-btn svg {
+            stroke: currentColor;
+        }
+        @media (max-width: 1023px) {
+            .sidebar {
+                display: none;
             }
         }
     </style>
@@ -66,202 +252,206 @@
 <body class="antialiased">
 
     <div class="flex min-h-screen">
-        <aside class="w-64 bg-[#efeae6] p-6 hidden lg:block sticky top-0 h-screen shadow-md">
-            <h1 class="text-xl font-bold text-[#003d5b] mb-8">APC in Refineries</h1>
-            <nav id="sidebar-nav">
-                <a href="#dashboard" class="sidebar-item block font-semibold py-2 px-4 rounded-lg mb-2 active">Dashboard</a>
-                <a href="#fundamentals" class="sidebar-item block font-semibold py-2 px-4 rounded-lg mb-2">Fundamentals</a>
-                <a href="#how-it-works" class="sidebar-item block font-semibold py-2 px-4 rounded-lg mb-2">How It Works</a>
-                <a href="#market-landscape" class="sidebar-item block font-semibold py-2 px-4 rounded-lg mb-2">Market Landscape</a>
-                <a href="#applications" class="sidebar-item block font-semibold py-2 px-4 rounded-lg mb-2">Applications & Cases</a>
-                <a href="#ai-ml-impact" class="sidebar-item block font-semibold py-2 px-4 rounded-lg mb-2">The AI/ML Revolution</a>
-                <a href="#roi-adoption" class="sidebar-item block font-semibold py-2 px-4 rounded-lg mb-2">ROI & Adoption</a>
+        <aside class="sidebar w-64 hidden lg:flex flex-col sticky top-0 h-screen px-6 py-8">
+            <div>
+                <h1 class="text-2xl font-semibold text-sky-100 mb-8">APC in Refineries</h1>
+            </div>
+            <nav id="sidebar-nav" class="space-y-1">
+                <a href="#dashboard" class="sidebar-item block font-semibold py-2.5 px-4 active">Dashboard</a>
+                <a href="#fundamentals" class="sidebar-item block font-semibold py-2.5 px-4">Fundamentals</a>
+                <a href="#how-it-works" class="sidebar-item block font-semibold py-2.5 px-4">How It Works</a>
+                <a href="#market-landscape" class="sidebar-item block font-semibold py-2.5 px-4">Market Landscape</a>
+                <a href="#applications" class="sidebar-item block font-semibold py-2.5 px-4">Applications &amp; Cases</a>
+                <a href="#ai-ml-impact" class="sidebar-item block font-semibold py-2.5 px-4">The AI/ML Revolution</a>
+                <a href="#roi-adoption" class="sidebar-item block font-semibold py-2.5 px-4">ROI &amp; Adoption</a>
             </nav>
         </aside>
 
-        <main class="flex-1 p-6 sm:p-8 md:p-10 bg-[#f8f7f4]">
-            <header class="flex justify-between items-center mb-8 lg:hidden">
-                <h1 class="text-xl font-bold text-[#003d5b]">APC in Refineries</h1>
-                <button id="menu-btn" class="p-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" /></svg>
-                </button>
-            </header>
+        <main class="flex-1 px-4 py-10 sm:px-8 lg:px-12 relative z-10">
+            <div class="mx-auto max-w-6xl">
+                <header class="flex items-center justify-between mb-8 lg:hidden">
+                    <h1 class="text-2xl font-semibold text-slate-100">APC in Refineries</h1>
+                    <button id="menu-btn" class="focus:outline-none" aria-label="Toggle navigation" aria-expanded="false">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" /></svg>
+                    </button>
+                </header>
 
-            <div id="mobile-menu" class="hidden lg:hidden mb-6">
-                <nav id="mobile-sidebar-nav" class="bg-white p-4 rounded-lg shadow">
-                    <a href="#dashboard" class="sidebar-item block font-semibold py-2 px-4 rounded-lg mb-1">Dashboard</a>
-                    <a href="#fundamentals" class="sidebar-item block font-semibold py-2 px-4 rounded-lg mb-1">Fundamentals</a>
-                    <a href="#how-it-works" class="sidebar-item block font-semibold py-2 px-4 rounded-lg mb-1">How It Works</a>
-                    <a href="#market-landscape" class="sidebar-item block font-semibold py-2 px-4 rounded-lg mb-1">Market Landscape</a>
-                    <a href="#applications" class="sidebar-item block font-semibold py-2 px-4 rounded-lg mb-1">Applications & Cases</a>
-                    <a href="#ai-ml-impact" class="sidebar-item block font-semibold py-2 px-4 rounded-lg mb-1">The AI/ML Revolution</a>
-                    <a href="#roi-adoption" class="sidebar-item block font-semibold py-2 px-4 rounded-lg mb-1">ROI & Adoption</a>
-                </nav>
-            </div>
+                <div id="mobile-menu" class="hidden lg:hidden">
+                    <nav id="mobile-sidebar-nav" class="inner-card p-4 space-y-1">
+                        <a href="#dashboard" class="sidebar-item block font-semibold py-2.5 px-3">Dashboard</a>
+                        <a href="#fundamentals" class="sidebar-item block font-semibold py-2.5 px-3">Fundamentals</a>
+                        <a href="#how-it-works" class="sidebar-item block font-semibold py-2.5 px-3">How It Works</a>
+                        <a href="#market-landscape" class="sidebar-item block font-semibold py-2.5 px-3">Market Landscape</a>
+                        <a href="#applications" class="sidebar-item block font-semibold py-2.5 px-3">Applications &amp; Cases</a>
+                        <a href="#ai-ml-impact" class="sidebar-item block font-semibold py-2.5 px-3">The AI/ML Revolution</a>
+                        <a href="#roi-adoption" class="sidebar-item block font-semibold py-2.5 px-3">ROI &amp; Adoption</a>
+                    </nav>
+                </div>
 
-            <div id="dashboard" class="content-section active">
-                <h2 class="text-3xl font-bold text-[#003d5b] mb-4">Dashboard: APC at a Glance</h2>
-                <p class="text-lg text-gray-600 mb-8">Advanced Process Control (APC) represents the next frontier in optimizing petroleum refinery operations. This interactive report provides a comprehensive overview, from core principles to the latest AI-driven innovations. Use the navigation to explore how APC pushes processes to their most profitable and efficient limits.</p>
-                
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-                    <div class="bg-white p-6 rounded-xl shadow-md border border-gray-200">
-                        <h3 class="text-lg font-semibold text-gray-500 mb-2">Average ROI</h3>
-                        <p class="text-4xl font-bold text-[#005f73]">200-500%</p>
-                        <p class="text-sm text-gray-500 mt-2">Typical return on investment within the first year.</p>
+                <div class="space-y-20">
+                    <div id="dashboard" class="content-section active space-y-10">
+                    <h2 class="text-4xl font-bold tracking-tight text-slate-100">Dashboard: APC at a Glance</h2>
+                    <p class="text-lg leading-relaxed text-slate-300">Advanced Process Control (APC) represents the next frontier in optimizing petroleum refinery operations. This interactive report provides a comprehensive overview, from core principles to the latest AI-driven innovations. Use the navigation to explore how APC pushes processes to their most profitable and efficient limits.</p>
+
+                    <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
+                        <div class="stat-card p-6 sm:p-7 xl:p-8">
+                            <h3 class="stat-title text-xs font-semibold uppercase tracking-[0.35em] mb-3">Average ROI</h3>
+                            <p class="stat-value text-4xl sm:text-5xl font-bold">200-500%</p>
+                            <p class="text-sm text-slate-200/80 mt-4 leading-relaxed">Typical return on investment within the first year of commissioning an APC controller.</p>
+                        </div>
+                        <div class="stat-card p-6 sm:p-7 xl:p-8">
+                            <h3 class="stat-title text-xs font-semibold uppercase tracking-[0.35em] mb-3">Global Market Size (2025 Est.)</h3>
+                            <p class="stat-value text-4xl sm:text-5xl font-bold">$4.5 Billion</p>
+                            <p class="text-sm text-slate-200/80 mt-4 leading-relaxed">Projected spend on APC software, engineering services, and sustainment programs.</p>
+                        </div>
+                        <div class="stat-card p-6 sm:p-7 xl:p-8">
+                            <h3 class="stat-title text-xs font-semibold uppercase tracking-[0.35em] mb-3">Typical Throughput Increase</h3>
+                            <p class="stat-value text-4xl sm:text-5xl font-bold">2-5%</p>
+                            <p class="text-sm text-slate-200/80 mt-4 leading-relaxed">Higher throughput without breaching constraints, while simultaneously cutting energy use.</p>
+                        </div>
                     </div>
-                    <div class="bg-white p-6 rounded-xl shadow-md border border-gray-200">
-                        <h3 class="text-lg font-semibold text-gray-500 mb-2">Global Market Size (2025 Est.)</h3>
-                        <p class="text-4xl font-bold text-[#005f73]">$4.5 Billion</p>
-                        <p class="text-sm text-gray-500 mt-2">For refining and petrochemical sectors.</p>
-                    </div>
-                    <div class="bg-white p-6 rounded-xl shadow-md border border-gray-200">
-                        <h3 class="text-lg font-semibold text-gray-500 mb-2">Typical Throughput Increase</h3>
-                        <p class="text-4xl font-bold text-[#005f73]">2-5%</p>
-                        <p class="text-sm text-gray-500 mt-2">While simultaneously reducing energy consumption.</p>
+
+                    <div class="surface-card p-8 sm:p-10">
+                        <h3 class="text-2xl font-semibold text-slate-100 mb-4">What is APC?</h3>
+                        <p class="leading-relaxed text-slate-300">Advanced Process Control (APC) is a sophisticated layer of software and engineering expertise that sits on top of a refinery's basic process control system (DCS). While the DCS focuses on keeping variables like temperature and pressure stable at setpoints, APC strategically manipulates these setpoints in real-time. Its goal is to continuously push the plant's operation towards its most optimal state, accounting for multiple constraints and objectives simultaneously. Think of it as an expert operator with a supercomputer brain, making constant, fine-tuned adjustments to maximize profitability, efficiency, and safety.</p>
                     </div>
                 </div>
 
-                <div class="bg-white p-8 rounded-xl shadow-md border border-gray-200">
-                    <h3 class="text-2xl font-bold text-[#003d5b] mb-4">What is APC?</h3>
-                    <p class="text-gray-700 leading-relaxed">Advanced Process Control (APC) is a sophisticated layer of software and engineering expertise that sits on top of a refinery's basic process control system (DCS). While the DCS focuses on keeping variables like temperature and pressure stable at setpoints, APC strategically manipulates these setpoints in real-time. Its goal is to continuously push the plant's operation towards its most optimal state, accounting for multiple constraints and objectives simultaneously. Think of it as an expert operator with a supercomputer brain, making constant, fine-tuned adjustments to maximize profitability, efficiency, and safety.</p>
-                </div>
-            </div>
+                    <div id="fundamentals" class="content-section space-y-10">
+                        <h2 class="text-4xl font-bold tracking-tight text-slate-100">Fundamentals of APC</h2>
+                        <p class="text-lg leading-relaxed text-slate-300">APC isn't a single tool, but a methodology built on multivariable predictive control (MPC). It uses a mathematical model of the process to predict how changes in independent variables (like valve positions) will affect dependent variables (like product quality) over time. This predictive power allows it to operate closer to constraints without violating them.</p>
 
-            <div id="fundamentals" class="content-section">
-                <h2 class="text-3xl font-bold text-[#003d5b] mb-4">Fundamentals of APC</h2>
-                <p class="text-lg text-gray-600 mb-8">APC isn't a single tool, but a methodology built on multivariable predictive control (MPC). It uses a mathematical model of the process to predict how changes in independent variables (like valve positions) will affect dependent variables (like product quality) over time. This predictive power allows it to operate closer to constraints without violating them.</p>
-
-                <div class="bg-white p-8 rounded-xl shadow-md border border-gray-200">
-                    <h3 class="text-2xl font-bold text-[#003d5b] mb-6 text-center">The Refinery Control Hierarchy</h3>
-                    <p class="text-center text-gray-600 mb-8">APC occupies a critical layer between basic regulatory control and high-level business planning. This diagram shows how these layers interact. Hover over each layer to learn more about its role and timescale.</p>
-                    <div id="hierarchy-diagram" class="space-y-4 max-w-2xl mx-auto">
-                        <div class="hierarchy-level border-2 border-[#003d5b] p-4 rounded-lg text-center" data-info="Role: High-level business strategy and supply chain management. Sets long-term production targets based on market forecasts and crude availability. Timescale: Weeks to Months.">
-                            <h4 class="font-bold text-lg text-[#003d5b]">Planning & Scheduling</h4>
-                        </div>
-                        <div class="flex justify-center"><div class="h-8 w-1 bg-gray-300"></div></div>
-                        <div class="hierarchy-level border-2 border-[#005f73] p-4 rounded-lg text-center" data-info="Role: Real-time optimization of the entire refinery or specific units. APC determines the optimal setpoints for the DCS to achieve the goals set by planning. Timescale: Minutes to Hours.">
-                            <h4 class="font-bold text-lg text-[#005f73]">Advanced Process Control (APC)</h4>
-                        </div>
-                         <div class="flex justify-center"><div class="h-8 w-1 bg-gray-300"></div></div>
-                        <div class="hierarchy-level border-2 border-[#94d2bd] p-4 rounded-lg text-center" data-info="Role: Basic regulatory control. Maintains process variables (temperature, pressure, flow) at the setpoints provided by the APC layer. Timescale: Seconds to Minutes.">
-                            <h4 class="font-bold text-lg text-[#94d2bd]">Basic Control (DCS/PLC)</h4>
-                        </div>
-                         <div class="flex justify-center"><div class="h-8 w-1 bg-gray-300"></div></div>
-                        <div class="hierarchy-level border-2 border-gray-400 p-4 rounded-lg text-center" data-info="Role: Physical equipment. The valves, pumps, heaters, and reactors that actually perform the refining process. Timescale: Real-time physical response.">
-                            <h4 class="font-bold text-lg text-gray-600">Field Instrumentation & Equipment</h4>
-                        </div>
-                    </div>
-                    <div id="hierarchy-info" class="mt-8 p-4 bg-gray-100 rounded-lg min-h-[100px] text-center text-gray-700 italic">
-                        Hover over a layer to see its description.
-                    </div>
-                </div>
-            </div>
-            
-            <div id="how-it-works" class="content-section">
-                <h2 class="text-3xl font-bold text-[#003d5b] mb-4">How It Works: The APC Methodology</h2>
-                <p class="text-lg text-gray-600 mb-8">Implementing an APC solution is a systematic project involving data analysis, model development, and careful deployment. The core is creating a robust predictive model of the process unit. Performance is then measured by controller uptime, model accuracy, and ultimately, the tangible economic benefits delivered.</p>
-
-                <div class="bg-white p-8 rounded-xl shadow-md border border-gray-200">
-                    <h3 class="text-2xl font-bold text-[#003d5b] mb-6 text-center">Typical APC Project Workflow</h3>
-                    <p class="text-center text-gray-600 mb-8">APC projects follow a well-defined path from conception to long-term maintenance. Click on each step below to understand the activities involved.</p>
-                    <div class="flex flex-col md:flex-row justify-between space-y-4 md:space-y-0 md:space-x-2">
-                        <div class="workflow-step flex-1 text-center p-4 border-b-4 border-gray-300 cursor-pointer" data-step="1">
-                            <div class="text-2xl font-bold text-gray-400 mb-2">1</div>
-                            <h4 class="font-semibold">Feasibility & Scoping</h4>
-                        </div>
-                        <div class="workflow-step flex-1 text-center p-4 border-b-4 border-gray-300 cursor-pointer" data-step="2">
-                           <div class="text-2xl font-bold text-gray-400 mb-2">2</div>
-                           <h4 class="font-semibold">Plant Testing & Modeling</h4>
-                        </div>
-                        <div class="workflow-step flex-1 text-center p-4 border-b-4 border-gray-300 cursor-pointer" data-step="3">
-                           <div class="text-2xl font-bold text-gray-400 mb-2">3</div>
-                           <h4 class="font-semibold">Controller Build & Simulation</h4>
-                        </div>
-                        <div class="workflow-step flex-1 text-center p-4 border-b-4 border-gray-300 cursor-pointer" data-step="4">
-                           <div class="text-2xl font-bold text-gray-400 mb-2">4</div>
-                           <h4 class="font-semibold">Deployment & Commissioning</h4>
-                        </div>
-                        <div class="workflow-step flex-1 text-center p-4 border-b-4 border-gray-300 cursor-pointer" data-step="5">
-                           <div class="text-2xl font-bold text-gray-400 mb-2">5</div>
-                           <h4 class="font-semibold">Benefit Capture & Sustainment</h4>
-                        </div>
-                    </div>
-                    <div id="workflow-details" class="mt-8 p-6 bg-gray-100 rounded-lg">
-                        <h4 id="workflow-title" class="text-xl font-bold text-[#003d5b] mb-2">Click a step above</h4>
-                        <p id="workflow-description" class="text-gray-700">Detailed information about the selected workflow step will appear here.</p>
-                    </div>
-                </div>
-            </div>
-
-            <div id="market-landscape" class="content-section">
-                <h2 class="text-3xl font-bold text-[#003d5b] mb-4">Market Landscape</h2>
-                <p class="text-lg text-gray-600 mb-8">The APC market for refineries is mature and dominated by a few key players who offer comprehensive suites of software and services. These companies have decades of experience and deep domain expertise. Click on a supplier in the chart to learn more about their offerings.</p>
-                <div class="bg-white p-8 rounded-xl shadow-md border border-gray-200">
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
-                        <div>
-                            <h3 class="text-2xl font-bold text-[#003d5b] mb-4 text-center">Estimated Market Share</h3>
-                             <div class="chart-container">
-                                <canvas id="marketShareChart"></canvas>
+                        <div class="surface-card p-8 sm:p-10">
+                            <h3 class="text-2xl font-semibold text-slate-100 mb-6 text-center">The Refinery Control Hierarchy</h3>
+                            <p class="text-center text-slate-300 mb-8">APC occupies a critical layer between basic regulatory control and high-level business planning. This diagram shows how these layers interact. Hover over each layer to learn more about its role and timescale.</p>
+                            <div id="hierarchy-diagram" class="space-y-4 max-w-2xl mx-auto">
+                                <div class="hierarchy-level p-4 sm:p-6 text-center" tabindex="0" data-info="Role: High-level business strategy and supply chain management. Sets long-term production targets based on market forecasts and crude availability. Timescale: Weeks to Months.">
+                                    <h4 class="font-semibold text-lg">Planning &amp; Scheduling</h4>
+                                </div>
+                                <div class="flex justify-center"><div class="h-8 w-1 bg-slate-500/40"></div></div>
+                                <div class="hierarchy-level p-4 sm:p-6 text-center" tabindex="0" data-info="Role: Real-time optimization of the entire refinery or specific units. APC determines the optimal setpoints for the DCS to achieve the goals set by planning. Timescale: Minutes to Hours.">
+                                    <h4 class="font-semibold text-lg">Advanced Process Control (APC)</h4>
+                                </div>
+                                <div class="flex justify-center"><div class="h-8 w-1 bg-slate-500/40"></div></div>
+                                <div class="hierarchy-level p-4 sm:p-6 text-center" tabindex="0" data-info="Role: Basic regulatory control. Maintains process variables (temperature, pressure, flow) at the setpoints provided by the APC layer. Timescale: Seconds to Minutes.">
+                                    <h4 class="font-semibold text-lg">Basic Control (DCS/PLC)</h4>
+                                </div>
+                                <div class="flex justify-center"><div class="h-8 w-1 bg-slate-500/40"></div></div>
+                                <div class="hierarchy-level p-4 sm:p-6 text-center" tabindex="0" data-info="Role: Physical equipment. The valves, pumps, heaters, and reactors that actually perform the refining process. Timescale: Real-time physical response.">
+                                    <h4 class="font-semibold text-lg">Field Instrumentation &amp; Equipment</h4>
+                                </div>
+                            </div>
+                            <div id="hierarchy-info" class="mt-8 p-5 min-h-[100px] text-center text-slate-300 italic">
+                                Hover or focus on a layer to see its description.
                             </div>
                         </div>
-                        <div id="supplier-info" class="p-6 bg-gray-50 rounded-lg">
-                            <h4 id="supplier-name" class="text-2xl font-bold text-[#003d5b] mb-3">Select a Supplier</h4>
-                            <p id="supplier-description" class="text-gray-700 mb-4">Details about the selected supplier's APC technology, key features, and market position will be displayed here.</p>
-                            <div id="supplier-features"></div>
+                    </div>
+            
+                    <div id="how-it-works" class="content-section space-y-10">
+                        <h2 class="text-4xl font-bold tracking-tight text-slate-100">How It Works: The APC Methodology</h2>
+                        <p class="text-lg leading-relaxed text-slate-300">Implementing an APC solution is a systematic project involving data analysis, model development, and careful deployment. The core is creating a robust predictive model of the process unit. Performance is then measured by controller uptime, model accuracy, and ultimately, the tangible economic benefits delivered.</p>
+
+                        <div class="surface-card p-8 sm:p-10">
+                            <h3 class="text-2xl font-semibold text-slate-100 mb-6 text-center">Typical APC Project Workflow</h3>
+                            <p class="text-center text-slate-300 mb-8">APC projects follow a well-defined path from conception to long-term maintenance. Click on each step below to understand the activities involved.</p>
+                            <div class="flex flex-col md:flex-row justify-between gap-3 md:gap-4">
+                                <div class="workflow-step flex-1 text-center cursor-pointer" data-step="1" tabindex="0" role="button" aria-pressed="false">
+                                    <div class="text-2xl font-semibold text-slate-200/70 mb-2">1</div>
+                                    <h4 class="text-lg font-semibold">Feasibility &amp; Scoping</h4>
+                                </div>
+                                <div class="workflow-step flex-1 text-center cursor-pointer" data-step="2" tabindex="0" role="button" aria-pressed="false">
+                                    <div class="text-2xl font-semibold text-slate-200/70 mb-2">2</div>
+                                    <h4 class="text-lg font-semibold">Plant Testing &amp; Modeling</h4>
+                                </div>
+                                <div class="workflow-step flex-1 text-center cursor-pointer" data-step="3" tabindex="0" role="button" aria-pressed="false">
+                                    <div class="text-2xl font-semibold text-slate-200/70 mb-2">3</div>
+                                    <h4 class="text-lg font-semibold">Controller Build &amp; Simulation</h4>
+                                </div>
+                                <div class="workflow-step flex-1 text-center cursor-pointer" data-step="4" tabindex="0" role="button" aria-pressed="false">
+                                    <div class="text-2xl font-semibold text-slate-200/70 mb-2">4</div>
+                                    <h4 class="text-lg font-semibold">Deployment &amp; Commissioning</h4>
+                                </div>
+                                <div class="workflow-step flex-1 text-center cursor-pointer" data-step="5" tabindex="0" role="button" aria-pressed="false">
+                                    <div class="text-2xl font-semibold text-slate-200/70 mb-2">5</div>
+                                    <h4 class="text-lg font-semibold">Benefit Capture &amp; Sustainment</h4>
+                                </div>
+                            </div>
+                            <div id="workflow-details" class="mt-8 p-6 md:p-8 rounded-2xl">
+                                <h4 id="workflow-title" class="text-xl font-semibold mb-2">Click a step above</h4>
+                                <p id="workflow-description" class="text-base leading-relaxed">Detailed information about the selected workflow step will appear here.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="market-landscape" class="content-section space-y-10">
+                        <h2 class="text-4xl font-bold tracking-tight text-slate-100">Market Landscape</h2>
+                        <p class="text-lg leading-relaxed text-slate-300">The APC market for refineries is mature and dominated by a few key players who offer comprehensive suites of software and services. These companies have decades of experience and deep domain expertise. Click on a supplier in the chart to learn more about their offerings.</p>
+                        <div class="surface-card p-8 sm:p-10">
+                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+                                <div>
+                                    <h3 class="text-2xl font-semibold text-slate-100 mb-4 text-center">Estimated Market Share</h3>
+                                    <div class="chart-container">
+                                        <canvas id="marketShareChart"></canvas>
+                                    </div>
+                                </div>
+                                <div id="supplier-info" class="inner-card p-6 sm:p-8 h-full">
+                                    <h4 id="supplier-name" class="text-2xl font-semibold text-slate-100 mb-3">Select a Supplier</h4>
+                                    <p id="supplier-description" class="text-slate-300 mb-4">Details about the selected supplier's APC technology, key features, and market position will be displayed here.</p>
+                                    <div id="supplier-features" class="space-y-3"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+            
+                    <div id="applications" class="content-section space-y-10">
+                        <h2 class="text-4xl font-bold tracking-tight text-slate-100">Applications &amp; Case Studies</h2>
+                        <p class="text-lg leading-relaxed text-slate-300">APC can be applied at various levels within a refinery, from a single piece of equipment to an entire complex. The scope of the application determines the complexity and potential benefits. Use the filters below to explore real-world case studies.</p>
+                        <div class="flex flex-wrap justify-center gap-3">
+                            <button class="filter-btn active px-5 py-2.5 font-semibold" data-filter="all">All Scopes</button>
+                            <button class="filter-btn px-5 py-2.5 font-semibold" data-filter="unit">Unit Level</button>
+                            <button class="filter-btn px-5 py-2.5 font-semibold" data-filter="equipment">Equipment Level</button>
+                            <button class="filter-btn px-5 py-2.5 font-semibold" data-filter="refinery">Refinery-Wide</button>
+                        </div>
+                        <div id="case-studies-grid" class="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3"></div>
+                    </div>
+
+                    <div id="ai-ml-impact" class="content-section space-y-10">
+                        <h2 class="text-4xl font-bold tracking-tight text-slate-100">The AI/ML Revolution</h2>
+                        <p class="text-lg leading-relaxed text-slate-300">While traditional APC relies on first-principle and empirical models, the integration of Artificial Intelligence (AI) and Machine Learning (ML) is unlocking new levels of performance. These technologies enhance APC by creating more accurate models, enabling autonomous operation, and providing predictive maintenance insights.</p>
+                        <div class="grid grid-cols-1 gap-8 lg:grid-cols-2">
+                            <div class="surface-card p-8 sm:p-10">
+                                <h3 class="text-2xl font-semibold text-slate-100 mb-4">Traditional APC</h3>
+                                <ul class="space-y-4 text-slate-300">
+                                    <li class="flex items-start"><span class="mr-3 mt-1 text-sky-300">&#10148;</span><span><strong class="text-slate-100">Model Type:</strong> Linear, step-test based models. Requires significant manual effort to build and maintain.</span></li>
+                                    <li class="flex items-start"><span class="mr-3 mt-1 text-sky-300">&#10148;</span><span><strong class="text-slate-100">Adaptation:</strong> Models are static and require periodic re-testing to account for catalyst aging or equipment fouling.</span></li>
+                                    <li class="flex items-start"><span class="mr-3 mt-1 text-sky-300">&#10148;</span><span><strong class="text-slate-100">Optimization:</strong> Solves a linear program at each step. Effective but can miss non-linear opportunities.</span></li>
+                                    <li class="flex items-start"><span class="mr-3 mt-1 text-sky-300">&#10148;</span><span><strong class="text-slate-100">Scope:</strong> Typically focused on stabilizing and pushing a single process unit towards its constraints.</span></li>
+                                </ul>
+                            </div>
+                            <div class="surface-card accent-card p-8 sm:p-10">
+                                <h3 class="text-2xl font-semibold text-slate-100 mb-4">AI-Enhanced APC</h3>
+                                <ul class="space-y-4 text-slate-300">
+                                    <li class="flex items-start"><span class="mr-3 mt-1 text-cyan-300">&#10148;</span><span><strong class="text-slate-100">Model Type:</strong> Non-linear models (Neural Networks, Random Forests) that learn directly from historical data.</span></li>
+                                    <li class="flex items-start"><span class="mr-3 mt-1 text-cyan-300">&#10148;</span><span><strong class="text-slate-100">Adaptation:</strong> Self-learning models that adapt in real-time to changing process dynamics, improving accuracy over time.</span></li>
+                                    <li class="flex items-start"><span class="mr-3 mt-1 text-cyan-300">&#10148;</span><span><strong class="text-slate-100">Optimization:</strong> Can use more complex algorithms (e.g., reinforcement learning) to find the true global optimum.</span></li>
+                                    <li class="flex items-start"><span class="mr-3 mt-1 text-cyan-300">&#10148;</span><span><strong class="text-slate-100">Scope:</strong> Enables plant-wide optimization and predictive alerts for equipment health, bridging operations and maintenance.</span></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+            
+                    <div id="roi-adoption" class="content-section space-y-10">
+                        <h2 class="text-4xl font-bold tracking-tight text-slate-100">ROI &amp; Adoption</h2>
+                        <p class="text-lg leading-relaxed text-slate-300">The business case for APC is exceptionally strong, which is why adoption is widespread in the refining industry. Benefits are realized through increased throughput, higher yields of valuable products, and reduced energy consumption. The chart below shows typical annualized benefits for various refinery units.</p>
+                        <div class="surface-card p-8 sm:p-10">
+                            <h3 class="text-2xl font-semibold text-slate-100 mb-6 text-center">Typical Annualized Benefits by Refinery Unit</h3>
+                            <div class="chart-container h-[380px] md:h-[460px]">
+                                <canvas id="roiChart"></canvas>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-            
-            <div id="applications" class="content-section">
-                <h2 class="text-3xl font-bold text-[#003d5b] mb-4">Applications & Case Studies</h2>
-                <p class="text-lg text-gray-600 mb-8">APC can be applied at various levels within a refinery, from a single piece of equipment to an entire complex. The scope of the application determines the complexity and potential benefits. Use the filters below to explore real-world case studies.</p>
-                <div class="flex flex-wrap justify-center gap-2 mb-8">
-                    <button class="filter-btn active px-4 py-2 bg-white rounded-full font-semibold shadow" data-filter="all">All Scopes</button>
-                    <button class="filter-btn px-4 py-2 bg-white rounded-full font-semibold shadow" data-filter="unit">Unit Level</button>
-                    <button class="filter-btn px-4 py-2 bg-white rounded-full font-semibold shadow" data-filter="equipment">Equipment Level</button>
-                    <button class="filter-btn px-4 py-2 bg-white rounded-full font-semibold shadow" data-filter="refinery">Refinery-Wide</button>
-                </div>
-                <div id="case-studies-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                </div>
-            </div>
-
-            <div id="ai-ml-impact" class="content-section">
-                <h2 class="text-3xl font-bold text-[#003d5b] mb-4">The AI/ML Revolution</h2>
-                <p class="text-lg text-gray-600 mb-8">While traditional APC relies on first-principle and empirical models, the integration of Artificial Intelligence (AI) and Machine Learning (ML) is unlocking new levels of performance. These technologies enhance APC by creating more accurate models, enabling autonomous operation, and providing predictive maintenance insights.</p>
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    <div class="bg-white p-8 rounded-xl shadow-md border border-gray-200">
-                        <h3 class="text-2xl font-bold text-[#003d5b] mb-4">Traditional APC</h3>
-                        <ul class="space-y-4 text-gray-700">
-                            <li class="flex items-start"><span class="font-bold text-[#005f73] mr-3 mt-1">&#10148;</span><span><strong>Model Type:</strong> Linear, step-test based models. Requires significant manual effort to build and maintain.</span></li>
-                            <li class="flex items-start"><span class="font-bold text-[#005f73] mr-3 mt-1">&#10148;</span><span><strong>Adaptation:</strong> Models are static and require periodic re-testing to account for catalyst aging or equipment fouling.</span></li>
-                            <li class="flex items-start"><span class="font-bold text-[#005f73] mr-3 mt-1">&#10148;</span><span><strong>Optimization:</strong> Solves a linear program at each step. Effective but can miss non-linear opportunities.</span></li>
-                            <li class="flex items-start"><span class="font-bold text-[#005f73] mr-3 mt-1">&#10148;</span><span><strong>Scope:</strong> Typically focused on stabilizing and pushing a single process unit towards its constraints.</span></li>
-                        </ul>
-                    </div>
-                    <div class="bg-white p-8 rounded-xl shadow-md border-2 border-[#00a896]">
-                        <h3 class="text-2xl font-bold text-[#00a896] mb-4">AI-Enhanced APC</h3>
-                         <ul class="space-y-4 text-gray-700">
-                            <li class="flex items-start"><span class="font-bold text-[#00a896] mr-3 mt-1">&#10148;</span><span><strong>Model Type:</strong> Non-linear models (Neural Networks, Random Forests) that learn directly from historical data.</span></li>
-                            <li class="flex items-start"><span class="font-bold text-[#00a896] mr-3 mt-1">&#10148;</span><span><strong>Adaptation:</strong> Self-learning models that adapt in real-time to changing process dynamics, improving accuracy over time.</span></li>
-                            <li class="flex items-start"><span class="font-bold text-[#00a896] mr-3 mt-1">&#10148;</span><span><strong>Optimization:</strong> Can use more complex algorithms (e.g., reinforcement learning) to find the true global optimum.</span></li>
-                            <li class="flex items-start"><span class="font-bold text-[#00a896] mr-3 mt-1">&#10148;</span><span><strong>Scope:</strong> Enables plant-wide optimization and predictive alerts for equipment health, bridging operations and maintenance.</span></li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-            
-            <div id="roi-adoption" class="content-section">
-                <h2 class="text-3xl font-bold text-[#003d5b] mb-4">ROI & Adoption</h2>
-                <p class="text-lg text-gray-600 mb-8">The business case for APC is exceptionally strong, which is why adoption is widespread in the refining industry. Benefits are realized through increased throughput, higher yields of valuable products, and reduced energy consumption. The chart below shows typical annualized benefits for various refinery units.</p>
-                <div class="bg-white p-8 rounded-xl shadow-md border border-gray-200">
-                    <h3 class="text-2xl font-bold text-[#003d5b] mb-6 text-center">Typical Annualized Benefits by Refinery Unit</h3>
-                    <div class="chart-container h-[400px] md:h-[500px]">
-                        <canvas id="roiChart"></canvas>
-                    </div>
-                </div>
-            </div>
-
         </main>
     </div>
 
@@ -289,6 +479,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
         window.scrollTo(0,0);
         mobileMenu.classList.add('hidden');
+        menuBtn.setAttribute('aria-expanded', 'false');
     }
 
     function setupNavigation(navContainerId) {
@@ -308,6 +499,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
     menuBtn.addEventListener('click', () => {
         mobileMenu.classList.toggle('hidden');
+        const expanded = menuBtn.getAttribute('aria-expanded') === 'true';
+        menuBtn.setAttribute('aria-expanded', String(!expanded));
     });
 
     const initialHash = window.location.hash || '#dashboard';
@@ -318,8 +511,10 @@ document.addEventListener('DOMContentLoaded', function () {
         datasets: [{
             label: 'Market Share',
             data: [35, 30, 15, 12, 8],
-            backgroundColor: ['#003d5b', '#005f73', '#00a896', '#94d2bd', '#e9d8a6'],
-            hoverOffset: 4
+            backgroundColor: ['#38bdf8', '#c084fc', '#f97316', '#22d3ee', '#facc15'],
+            borderColor: 'rgba(15, 23, 42, 0.6)',
+            borderWidth: 2,
+            hoverOffset: 12
         }]
     };
     
@@ -358,11 +553,24 @@ document.addEventListener('DOMContentLoaded', function () {
         options: {
             responsive: true,
             maintainAspectRatio: false,
+            cutout: '55%',
+            layout: {
+                padding: 12
+            },
             plugins: {
                 legend: {
-                    position: 'top',
+                    position: 'bottom',
+                    labels: {
+                        color: '#e2e8f0',
+                        padding: 16,
+                        usePointStyle: true,
+                        pointStyle: 'circle'
+                    }
                 },
                 tooltip: {
+                    backgroundColor: 'rgba(15, 23, 42, 0.92)',
+                    titleColor: '#e2e8f0',
+                    bodyColor: '#cbd5f5',
                     callbacks: {
                         label: function(context) {
                             let label = context.label || '';
@@ -394,13 +602,13 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('supplier-name').textContent = info.name;
         document.getElementById('supplier-description').textContent = info.description;
         const featuresList = document.getElementById('supplier-features');
-        featuresList.innerHTML = '<h5 class="font-semibold text-gray-800 mb-2">Key Features:</h5>';
+        featuresList.innerHTML = '<h5 class="text-lg font-semibold text-slate-100 mb-3">Key Features</h5>';
         const ul = document.createElement('ul');
-        ul.className = 'list-none space-y-2';
+        ul.className = 'space-y-2';
         info.features.forEach(feature => {
             const li = document.createElement('li');
-            li.className = 'flex items-start text-sm text-gray-600';
-            li.innerHTML = `<span class="text-[#005f73] mr-2">&#10003;</span> ${feature}`;
+            li.className = 'flex items-start text-sm text-slate-300';
+            li.innerHTML = `<span class="mr-2 mt-0.5 text-sky-300">&#10003;</span><span>${feature}</span>`;
             ul.appendChild(li);
         });
         featuresList.appendChild(ul);
@@ -412,9 +620,11 @@ document.addEventListener('DOMContentLoaded', function () {
         datasets: [{
             label: 'Annualized Benefits (USD Millions)',
             data: [2.5, 4.0, 3.5, 2.0, 1.8, 3.0, 5.5],
-            backgroundColor: '#005f73',
-            borderColor: '#003d5b',
-            borderWidth: 1
+            backgroundColor: 'rgba(56, 189, 248, 0.7)',
+            borderColor: '#38bdf8',
+            hoverBackgroundColor: 'rgba(192, 132, 252, 0.7)',
+            borderWidth: 2,
+            borderRadius: 14
         }]
     };
     const roiCtx = document.getElementById('roiChart').getContext('2d');
@@ -427,8 +637,17 @@ document.addEventListener('DOMContentLoaded', function () {
             maintainAspectRatio: false,
             plugins: {
                 legend: { display: false },
-                title: { display: true, text: 'Benefit ranges can vary based on unit size and market conditions.' },
-                 tooltip: {
+                title: {
+                    display: true,
+                    text: 'Benefit ranges can vary based on unit size and market conditions.',
+                    color: '#cbd5f5',
+                    font: { size: 13, weight: '500' },
+                    padding: { bottom: 16 }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(15, 23, 42, 0.92)',
+                    titleColor: '#e2e8f0',
+                    bodyColor: '#cbd5f5',
                     callbacks: {
                         label: function(context) {
                             return ` $${context.formattedValue} Million`;
@@ -439,9 +658,26 @@ document.addEventListener('DOMContentLoaded', function () {
             scales: {
                 x: {
                     beginAtZero: true,
+                    grid: {
+                        color: 'rgba(148, 163, 184, 0.2)',
+                        borderDash: [4, 4]
+                    },
+                    ticks: {
+                        color: '#cbd5f5'
+                    },
                     title: {
                         display: true,
-                        text: 'Annual Benefits (USD Millions)'
+                        text: 'Annual Benefits (USD Millions)',
+                        color: '#cbd5f5',
+                        font: { size: 13 }
+                    }
+                },
+                y: {
+                    grid: {
+                        display: false
+                    },
+                    ticks: {
+                        color: '#e2e8f0'
                     }
                 }
             }
@@ -450,16 +686,19 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const hierarchyLevels = document.querySelectorAll('.hierarchy-level');
     const hierarchyInfoBox = document.getElementById('hierarchy-info');
+    const hierarchyDefaultText = 'Hover or focus on a layer to see its description.';
+    hierarchyInfoBox.textContent = hierarchyDefaultText;
     hierarchyLevels.forEach(level => {
-        level.addEventListener('mouseenter', () => {
+        const showInfo = () => {
             hierarchyInfoBox.textContent = level.dataset.info;
-            level.style.transform = 'scale(1.03)';
-            level.style.transition = 'transform 0.2s';
-        });
-        level.addEventListener('mouseleave', () => {
-            hierarchyInfoBox.textContent = 'Hover over a layer to see its description.';
-            level.style.transform = 'scale(1)';
-        });
+        };
+        const resetInfo = () => {
+            hierarchyInfoBox.textContent = hierarchyDefaultText;
+        };
+        level.addEventListener('mouseenter', showInfo);
+        level.addEventListener('focus', showInfo);
+        level.addEventListener('mouseleave', resetInfo);
+        level.addEventListener('blur', resetInfo);
     });
     
     const workflowSteps = document.querySelectorAll('.workflow-step');
@@ -491,18 +730,29 @@ document.addEventListener('DOMContentLoaded', function () {
     function updateWorkflowStep(step) {
         workflowSteps.forEach(s => {
             s.classList.remove('active-step');
-            s.style.borderColor = '#d1d5db';
+            s.setAttribute('aria-pressed', 'false');
         });
         const activeStep = document.querySelector(`.workflow-step[data-step="${step}"]`);
-        activeStep.style.borderColor = '#005f73';
+        if (activeStep) {
+            activeStep.classList.add('active-step');
+            activeStep.setAttribute('aria-pressed', 'true');
+        }
         const data = workflowData[step];
-        workflowTitle.textContent = data.title;
-        workflowDescription.textContent = data.description;
+        if (data) {
+            workflowTitle.textContent = data.title;
+            workflowDescription.textContent = data.description;
+        }
     }
-    
+
     workflowSteps.forEach(step => {
         step.addEventListener('click', () => {
             updateWorkflowStep(step.dataset.step);
+        });
+        step.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                updateWorkflowStep(step.dataset.step);
+            }
         });
     });
     updateWorkflowStep('1');
@@ -592,22 +842,20 @@ document.addEventListener('DOMContentLoaded', function () {
 
         filteredData.forEach(study => {
             const card = document.createElement('div');
-            card.className = `case-study-card bg-white p-6 rounded-xl shadow-md border border-gray-200 flex flex-col`;
+            card.className = 'case-study-card surface-card p-6 sm:p-7 flex flex-col';
             card.setAttribute('data-category', study.category);
             card.innerHTML = `
-                <span class="inline-block bg-[#e9d8a6] text-[#003d5b] px-3 py-1 text-sm font-semibold rounded-full self-start mb-4 capitalize">${study.category.replace('-', ' ')} Level</span>
-                <h4 class="text-xl font-bold text-[#003d5b] mb-3">${study.title}</h4>
-                <div class="mb-4 flex-grow">
-                    <p class="font-semibold text-gray-800">Problem:</p>
-                    <p class="text-gray-600 text-sm mb-2">${study.problem}</p>
-                    <p class="font-semibold text-gray-800">APC Solution:</p>
-                    <p class="text-gray-600 text-sm">${study.solution}</p>
+                <span class="card-tag inline-flex items-center px-4 py-1 text-xs font-semibold uppercase tracking-[0.35em] self-start mb-6">${study.category.replace('-', ' ')} Level</span>
+                <h4 class="text-2xl font-semibold text-slate-100 mb-4 leading-snug">${study.title}</h4>
+                <div class="mb-6 space-y-3 text-sm text-slate-300">
+                    <p><span class="font-semibold text-slate-100">Problem:</span> ${study.problem}</p>
+                    <p><span class="font-semibold text-slate-100">APC Solution:</span> ${study.solution}</p>
                 </div>
-                <div class="border-t pt-4 mt-auto">
-                    <p class="text-sm text-gray-800"><span class="font-bold">ROI:</span> ${study.roi}</p>
-                    <div class="flex justify-between text-sm mt-2 text-gray-500">
-                        <span><span class="font-semibold">CAPEX:</span> ${study.capex}</span>
-                        <span><span class="font-semibold">Timeline:</span> ${study.timeline}</span>
+                <div class="card-footer pt-4 mt-auto text-sm text-slate-300/90">
+                    <p class="mb-3"><span class="font-semibold text-slate-100">ROI:</span> ${study.roi}</p>
+                    <div class="flex flex-col gap-2 text-xs sm:flex-row sm:items-center sm:justify-between text-slate-300/80">
+                        <span><span class="font-semibold text-slate-100 tracking-wide uppercase">CAPEX:</span> ${study.capex}</span>
+                        <span><span class="font-semibold text-slate-100 tracking-wide uppercase">Timeline:</span> ${study.timeline}</span>
                     </div>
                 </div>
             `;
